@@ -1,0 +1,10 @@
+.preview {
+  border: 1px solid pink;
+}
+
+@media print {
+  .preview {
+    border: 1px solid black;
+    margin: 6.35mm;
+  }
+}

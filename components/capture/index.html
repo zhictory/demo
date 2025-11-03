@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>在H5中调用摄像头拍照的替代方案</title>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <script src="/assets/js/eruda@2.3.3/eruda.js"></script>
+    <script>
+      eruda.init();
+    </script>
+  </head>
+  <body>
+    <h1>在H5中调用摄像头拍照的替代方案</h1>
+
+    <h2>使用 input file capture（不需要获取权限）</h2>
+    <p>
+      <input type="file" accept="image/*" onchange="handlePhoto(this.files[0])" />
+    </p>
+    <script>
+      function guessPhotoSource(file) {
+        const overdue = new Date();
+        overdue.setHours(16, 40, 0, 0);
+        console.log(`\x1b[32m181579⬇️\n`, file.name, "name", `\n`);
+        console.log(`\x1b[32m550055⬇️\n`, new Date(file.lastModified).toLocaleString(), "photo time", `\n`);
+        console.log(`\x1b[32m395603⬇️\n`, overdue.toLocaleString(), "overdue time", `\n`);
+        // 检查文件类型和最后修改时间
+        const oneHourAgo = Date.now() - 24 * 60 * 60 * 1000;
+        if (new Date(file.lastModified) < overdue) {
+          return "likely_gallery";
+        }
+        return "likely_camera";
+      }
+      function handlePhoto(file) {
+        const source = guessPhotoSource(file);
+        console.log(`\x1b[32m039794⬇️\n`, source, "source", `\n`);
+      }
+    </script>
+
+    <h2>使用WebRTC + 自定义UI</h2>
+    <div id="camera-container">
+      <p>
+        <video id="camera-preview" autoplay playsinline width="200" height="200"></video>
+      </p>
+      <p>
+        <button id="capture-btn">拍照</button>
+      </p>
+      <p>
+        <canvas id="photo-canvas" style="width: 100%; max-width: 200px"></canvas>
+      </p>
+    </div>
+    <script>
+      const webRtc = () => {
+        const video = document.getElementById("camera-preview");
+        const canvas = document.getElementById("photo-canvas");
+        const ctx = canvas.getContext("2d");
+        // 启动摄像头
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+          };
+        });
+        // 拍照按钮事件
+        document.getElementById("capture-btn").addEventListener("click", () => {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const photoData = canvas.toDataURL("image/jpeg");
+          // 处理照片数据...
+        });
+      };
+      // webRtc();
+    </script>
+
+    <h2>使用MediaDevices.getUserMedia() API</h2>
+    <img src="/assets/image/default-scaled.jpeg" alt="" id="getUserMedia" style="width: 100%; max-width: 200px" />
+    <script>
+      // 请求摄像头权限并显示视频流
+      async function capturePhoto() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment" }, // 使用后置摄像头
+            audio: false,
+          });
+
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+            video.play();
+
+            // 创建画布来捕获帧
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // 获取图片数据
+            const photoData = canvas.toDataURL("image/jpeg");
+
+            // 停止视频流
+            stream.getTracks().forEach((track) => track.stop());
+
+            // 使用photoData (base64编码的图像)
+            console.log(photoData);
+            document.querySelector("#getUserMedia").setAttribute("src", photoData);
+          };
+        } catch (err) {
+          console.error("摄像头访问失败:", err);
+        }
+      }
+      // capturePhoto();
+    </script>
+
+    <h2>使用Image Capture API (更高级的控制)</h2>
+    <img src="/assets/image/default-scaled.jpeg" alt="" id="Capture" style="width: 100%; max-width: 200px" />
+    <script>
+      async function advancedCapture() {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const track = stream.getVideoTracks()[0];
+          const imageCapture = new ImageCapture(track);
+
+          const photoBlob = await imageCapture.takePhoto();
+          const photoUrl = URL.createObjectURL(photoBlob);
+
+          // 使用photoUrl
+          console.log(photoUrl);
+          document.querySelector("#Capture").setAttribute("src", photoUrl);
+
+          track.stop();
+        } catch (err) {
+          console.error("高级拍照失败:", err);
+        }
+      }
+      // advancedCapture();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Custom Card Component</title>
+    <style>
+      :root {
+        --primary-color: #4361ee;
+        --hover-color: #3a56d4;
+      }
+
+      interactive-card {
+        display: block;
+        width: 320px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease;
+        margin: 20px;
+      }
+
+      interactive-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-image {
+        height: 180px;
+        background-color: var(--primary-color);
+        position: relative;
+      }
+
+      .card-content {
+        padding: 24px;
+      }
+
+      .card-title {
+        font-size: 1.5rem;
+        margin: 0 0 12px;
+        color: #2b2d42;
+      }
+
+      .card-text {
+        color: #6c757d;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .card-button {
+        display: inline-block;
+        background-color: var(--primary-color);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: background-color 0.2s;
+        cursor: pointer;
+      }
+
+      .card-button:hover {
+        background-color: var(--hover-color);
+      }
+
+      .badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+    </style>
+  </head>
+  <body>
+    <interactive-card title="Custom Element Demo" text="This card is built using customElements.define" badge="New"></interactive-card>
+
+    <interactive-card title="Second Card" text="Fully reusable component with attributes" badge="Hot"></interactive-card>
+
+    <script>
+      class InteractiveCard extends HTMLElement {
+        static get observedAttributes() {
+          return ["title", "text", "badge"];
+        }
+
+        constructor() {
+          super();
+          this.attachShadow({ mode: "open" });
+
+          this.colors = ["#4361ee", "#3f37c9", "#4895ef", "#4cc9f0"];
+        }
+
+        connectedCallback() {
+          this.render();
+          this.setupEventListeners();
+        }
+
+        attributeChangedCallback(name, oldValue, newValue) {
+          if (oldValue !== newValue) {
+            this.render();
+          }
+        }
+
+        render() {
+          const title = this.getAttribute("title") || "Default Title";
+          const text = this.getAttribute("text") || "Default description text";
+          const badge = this.getAttribute("badge") || "";
+
+          this.shadowRoot.innerHTML = `
+                    <style>
+                        :host {
+                            display: block;
+                            width: 320px;
+                            background: white;
+                            border-radius: 12px;
+                            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                            overflow: hidden;
+                            transition: transform 0.3s ease;
+                        }
+                        
+                        :host(:hover) {
+                            transform: translateY(-5px);
+                        }
+                        
+                        .card-image {
+                            height: 180px;
+                            background-color: var(--primary-color);
+                            position: relative;
+                        }
+                        
+                        .card-content {
+                            padding: 24px;
+                        }
+                        
+                        .card-title {
+                            font-size: 1.5rem;
+                            margin: 0 0 12px;
+                            color: #2b2d42;
+                        }
+                        
+                        .card-text {
+                            color: #6c757d;
+                            line-height: 1.6;
+                            margin-bottom: 20px;
+                        }
+                        
+                        .card-button {
+                            display: inline-block;
+                            background-color: var(--primary-color);
+                            color: white;
+                            padding: 10px 20px;
+                            border-radius: 6px;
+                            text-decoration: none;
+                            font-weight: 500;
+                            transition: background-color 0.2s;
+                            cursor: pointer;
+                        }
+                        
+                        .card-button:hover {
+                            background-color: var(--hover-color);
+                        }
+                        
+                        .badge {
+                            position: absolute;
+                            top: 15px;
+                            right: 15px;
+                            background-color: rgba(255,255,255,0.9);
+                            padding: 4px 10px;
+                            border-radius: 20px;
+                            font-size: 0.8rem;
+                            font-weight: 600;
+                            color: var(--primary-color);
+                        }
+                    </style>
+                    <div class="card-image">
+                        ${badge ? `<span class="badge">${badge}</span>` : ""}
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">${title}</h3>
+                        <p class="card-text">${text}</p>
+                        <div class="card-button" id="actionBtn">Click Me</div>
+                    </div>
+                `;
+        }
+
+        setupEventListeners() {
+          this.shadowRoot.getElementById("actionBtn").addEventListener("click", () => {
+            const randomColor = this.colors[Math.floor(Math.random() * this.colors.length)];
+
+            const cardImage = this.shadowRoot.querySelector(".card-image");
+            const badge = this.shadowRoot.querySelector(".badge");
+            const button = this.shadowRoot.getElementById("actionBtn");
+
+            cardImage.style.backgroundColor = randomColor;
+            if (badge) badge.style.color = randomColor;
+            button.style.backgroundColor = randomColor;
+
+            button.textContent = "Color Changed!";
+            setTimeout(() => {
+              button.textContent = "Click Me";
+            }, 1000);
+          });
+        }
+      }
+
+      customElements.define("interactive-card", InteractiveCard);
+    </script>
+  </body>
+</html>

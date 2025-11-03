@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSS变量 + data-bem方案示例</title>
+    <style>
+      /* 全局CSS变量定义 */
+      :root {
+        /* 颜色主题变量 */
+        --button-bg-primary: #1890ff;
+        --button-bg-danger: #ff4d4f;
+        --button-bg-disabled: #d9d9d9;
+        --button-text-color: #ffffff;
+        --button-disabled-text: #999999;
+
+        /* 尺寸变量 */
+        --size-small: 8px 12px;
+        --size-medium: 12px 16px;
+        --size-large: 16px 24px;
+
+        /* 卡片变量 */
+        --card-bg: #ffffff;
+        --card-border: #e0e0e0;
+        --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Button Block 样式 */
+      [data-blk="button"] {
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        transition: all 0.2s ease;
+
+        /* 通过CSS变量动态赋值 */
+        background-color: var(--button-bg, var(--button-bg-primary));
+        padding: var(--button-size, var(--size-medium));
+        color: var(--button-text, var(--button-text-color));
+      }
+
+      /* Button Element 样式 */
+      [data-blk="button"] > [data-ele="text"] {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+      }
+
+      [data-blk="button"] > [data-ele="icon"] {
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+
+      /* Button Modifier 样式 */
+      [data-blk="button"][data-mod~="primary"] {
+        --button-bg: var(--button-bg-primary);
+      }
+
+      [data-blk="button"][data-mod~="danger"] {
+        --button-bg: var(--button-bg-danger);
+      }
+
+      [data-blk="button"][data-mod~="disabled"] {
+        --button-bg: var(--button-bg-disabled);
+        --button-text: var(--button-disabled-text);
+        cursor: not-allowed;
+      }
+
+      [data-blk="button"][data-mod~="small"] {
+        --button-size: var(--size-small);
+      }
+
+      [data-blk="button"][data-mod~="large"] {
+        --button-size: var(--size-large);
+        font-size: 16px;
+      }
+
+      /* 交互状态 */
+      [data-blk="button"]:not([data-mod~="disabled"]):hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+      }
+
+      [data-blk="button"]:not([data-mod~="disabled"]):active {
+        transform: translateY(0);
+      }
+
+      /* Card Block 示例 */
+      [data-blk="card"] {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: var(--card-shadow);
+        margin: 16px 0;
+      }
+
+      [data-blk="card"] > [data-ele="title"] {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: #333;
+      }
+
+      [data-blk="card"] > [data-ele="content"] {
+        color: #666;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>CSS变量 + data-bem方案示例</h1>
+
+    <!-- Button 示例 -->
+    <div>
+      <h2>按钮组件</h2>
+      <button data-blk="button" data-mod="primary">
+        <span data-ele="text">主要按钮</span>
+      </button>
+
+      <button data-blk="button" data-mod="danger large">
+        <span data-ele="text">大型危险按钮</span>
+      </button>
+
+      <button data-blk="button" data-mod="disabled">
+        <span data-ele="text">禁用按钮</span>
+      </button>
+
+      <button data-blk="button" data-mod="primary small">
+        <span data-ele="icon">⚡</span>
+        <span data-ele="text">带图标小按钮</span>
+      </button>
+    </div>
+
+    <!-- Card 示例 -->
+    <div>
+      <h2>卡片组件</h2>
+      <div data-blk="card">
+        <div data-ele="title">卡片标题</div>
+        <div data-ele="content">这是一个使用data-bem方案的卡片组件，展示了如何结合CSS变量实现灵活的样式控制。</div>
+      </div>
+    </div>
+
+    <!-- 动态修改CSS变量示例 -->
+    <div>
+      <h2>动态主题切换</h2>
+      <button onclick="changeTheme('light')">浅色主题</button>
+      <button onclick="changeTheme('dark')">深色主题</button>
+    </div>
+
+    <script>
+      function changeTheme(theme) {
+        const root = document.documentElement;
+        if (theme === "dark") {
+          root.style.setProperty("--button-bg-primary", "#52c41a");
+          root.style.setProperty("--card-bg", "#2d2d2d");
+          root.style.setProperty("--card-border", "#444");
+          root.style.setProperty("--card-shadow", "0 2px 8px rgba(255, 255, 255, 0.1)");
+        } else {
+          root.style.setProperty("--button-bg-primary", "#1890ff");
+          root.style.setProperty("--card-bg", "#ffffff");
+          root.style.setProperty("--card-border", "#e0e0e0");
+          root.style.setProperty("--card-shadow", "0 2px 8px rgba(0, 0, 0, 0.1)");
+        }
+      }
+    </script>
+
+    <h2>思考</h2>
+    <pre>
+      HTML 规范的正确理解
+
+      ​1. data-属性的设计初衷*​：
+      用于存储自定义数据，供 JavaScript 使用
+      为开发者提供与元素相关的私有数据存储空间
+      主要用于 JS 交互、状态管理、数据绑定等
+
+      ​2. 规范推荐的样式方案​：
+      ​class 属性​：是 HTML 和 CSS 规范中明确的样式钩子
+      符合语义化标准的属性（如 disabled, hidden, type等）
+      ARIA 属性（如 aria-disabled, aria-hidden）用于可访问性相关样式
+      
+      ​3. W3C 规范说明​：
+      "Custom data attributes are intended to store custom data private to the page or application, for which there are no more appropriate attributes or elements."
+    </pre>
+    <pre>
+      <code>
+        &lt;button class="button" 
+          data-mod="primary large" 
+          aria-disabled="false"
+          style="--button-bg: var(--color-primary)"&gt;
+            &lt;span class="button__text"&gt;按钮&lt;/span&gt;
+        &lt;/button&gt;
+      </code>
+    </pre>
+    <pre>
+      何时可以使用 data-* 属性辅助样式
+      ​状态管理​：当样式与复杂JS状态绑定时（如 data-loading="true"）
+      ​动态主题​：data-theme="dark"配合 CSS 属性选择器
+      ​条件样式​：无法用纯CSS表达的逻辑状态
+    </pre>
+  </body>
+</html>
