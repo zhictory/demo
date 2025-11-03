@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Service 测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
+        .test-result {
+            background: #fff;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .success {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background-color: #f8d7da;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .rss-preview {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cloudflare Workers RSS 服务测试</h1>
+    
+    <div class="test-section">
+        <h2>服务状态测试</h2>
+        <button onclick="testRootEndpoint()">测试根路径</button>
+        <button onclick="testRSSEndpoint()">测试 RSS 端点</button>
+        <div id="status-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>RSS 源测试</h2>
+        <button onclick="testTechNews()">测试技术新闻 RSS</button>
+        <button onclick="testBlogPosts()">测试博客文章 RSS</button>
+        <div id="rss-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>RSS 内容预览</h2>
+        <div id="rss-preview"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Fluent Reader 兼容性测试</h2>
+        <p>在 Fluent Reader 中添加以下 RSS 链接进行测试：</p>
+        <ul>
+            <li><code id="tech-news-url"></code></li>
+            <li><code id="blog-posts-url"></code></li>
+        </ul>
+        <button onclick="copyToClipboard('tech-news-url')">复制技术新闻链接</button>
+        <button onclick="copyToClipboard('blog-posts-url')">复制博客文章链接</button>
+    </div>
+
+    <script>
+        // 获取当前域名用于构建 URL
+        const currentOrigin = window.location.origin;
+        
+        // 设置 RSS 链接
+        document.getElementById('tech-news-url').textContent = `${currentOrigin}/rss/tech-news`;
+        document.getElementById('blog-posts-url').textContent = `${currentOrigin}/rss/blog-posts`;
+
+        // 测试根路径
+        async function testRootEndpoint() {
+            const resultsDiv = document.getElementById('status-results');
+            try {
+                const response = await fetch('/');
+                const text = await response.text();
+                
+                resultsDiv.innerHTML = `
+                    <div class="test-result success">
+                        <h3>✅ 根路径测试成功</h3>
+                        <p>状态码: ${response.status}</p>
+                        <p>Content-Type: ${response.headers.get('Content-Type')}</p>
+                        <details>
+                            <summary>查看响应内容</summary>
+                            <pre>${escapeHtml(text.substring(0, 500))}${text.length > 500 ? '...' : ''}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="test-result error">
+                        <h3>❌ 根路径测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 测试 RSS 端点
+        async function testRSSEndpoint() {
+            const resultsDiv = document.getElementById('status-results');
+            try {
+                const response = await fetch('/rss');
+                const text = await response.text();
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-result ${response.ok ? 'success' : 'error'}">
+                        <h3>${response.ok ? '✅' : '❌'} RSS 端点测试</h3>
+                        <p>状态码: ${response.status}</p>
+                        <p>Content-Type: ${response.headers.get('Content-Type')}</p>
+                        <details>
+                            <summary>查看响应内容</summary>
+                            <pre>${escapeHtml(text.substring(0, 500))}${text.length > 500 ? '...' : ''}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ RSS 端点测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 测试技术新闻 RSS
+        async function testTechNews() {
+            await testRSSFeed('tech-news', '技术新闻');
+        }
+
+        // 测试博客文章 RSS
+        async function testBlogPosts() {
+            await testRSSFeed('blog-posts', '博客文章');
+        }
+
+        // 通用 RSS 测试函数
+        async function testRSSFeed(feedId, feedName) {
+            const resultsDiv = document.getElementById('rss-results');
+            const previewDiv = document.getElementById('rss-preview');
+            
+            try {
+                const response = await fetch(`/rss/${feedId}`);
+                const text = await response.text();
+                
+                // 验证 RSS 格式
+                const isValidRSS = text.includes('<?xml') && text.includes('<rss') && text.includes('<channel>');
+                
+                resultsDiv.innerHTML += `
+                    <div class="test-result ${response.ok && isValidRSS ? 'success' : 'error'}">
+                        <h3>${response.ok && isValidRSS ? '✅' : '❌'} ${feedName} RSS 测试</h3>
+                        <p>状态码: ${response.status}</p>
+                        <p>Content-Type: ${response.headers.get('Content-Type')}</p>
+                        <p>RSS 格式验证: ${isValidRSS ? '✅ 通过' : '❌ 失败'}</p>
+                        <details>
+                            <summary>查看 RSS 内容</summary>
+                            <pre>${escapeHtml(text)}</pre>
+                        </details>
+                    </div>
+                `;
+
+                // 显示 RSS 预览
+                if (response.ok && isValidRSS) {
+                    previewDiv.innerHTML += `
+                        <div class="rss-preview">
+                            <h3>${feedName} RSS 预览</h3>
+                            <iframe src="/rss/${feedId}" style="width: 100%; height: 300px; border: 1px solid #ddd;"></iframe>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML += `
+                    <div class="test-result error">
+                        <h3>❌ ${feedName} RSS 测试失败</h3>
+                        <p>错误: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`已复制: ${text}`);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // 备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert(`已复制: ${text}`);
+            });
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 页面加载时自动运行测试
+        window.addEventListener('load', () => {
+            console.log('RSS 服务测试页面已加载');
+            console.log('可以手动运行测试，或等待自动测试');
+        });
+    </script>
+</body>
+</html>

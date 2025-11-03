@@ -1,0 +1,37 @@
+{
+  "name": "cloudflare-rss-service",
+  "version": "1.0.0",
+  "description": "基于 Cloudflare Workers 的 RSS 订阅服务，专门为 Fluent Reader 等 RSS 阅读器提供标准化的 RSS 源",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail",
+    "test": "node test.js",
+    "start": "wrangler dev --local"
+  },
+  "keywords": [
+    "rss",
+    "cloudflare",
+    "workers",
+    "fluent-reader",
+    "feed",
+    "xml"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/cloudflare-rss-service.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/cloudflare-rss-service/issues"
+  },
+  "homepage": "https://github.com/yourusername/cloudflare-rss-service#readme"
+}
