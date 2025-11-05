@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Attributes vs BEM - CMS组件定制场景</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="header__title">Data Attributes vs BEM</h1>
+            <p class="header__subtitle">CMS组件定制场景下的实际应用对比</p>
+        </header>
+
+        <!-- 文章背景 -->
+        <section class="background">
+            <div class="background__content">
+                <h2 class="background__title">背景介绍</h2>
+                <p class="background__text">
+                    在CMS界面中，编辑者有时可以自定义组件的渲染方式。比如在Accordion组件中，编辑者可以从下拉菜单中选择展开图标类型。
+                </p>
+                <p class="background__text">
+                    传统上，我们可能会使用BEM命名规范来处理这些变化，但在CMS定制场景下，data attributes可能是一个更好的选择。
+                </p>
+            </div>
+        </section>
+
+        <!-- 场景1: Accordion图标选择 -->
+        <section class="scenario">
+            <h2 class="scenario__title">场景1: Accordion图标选择</h2>
+            
+            <div class="comparison-grid">
+                <!-- BEM方法 -->
+                <div class="comparison-card">
+                    <h3 class="comparison-card__title comparison-card__title--bem">传统BEM方法</h3>
+                    <div class="comparison-card__code">
+                        <div class="accordion-example">
+                            <span class="accordion-item accordion-item--icon-down">向下箭头</span>
+                            <span class="accordion-item accordion-item--icon-right">向右箭头</span>
+                            <span class="accordion-item accordion-item--icon-plus">加号图标</span>
+                        </div>
+                        <pre><code>&lt;span class="accordion-item accordion-item--icon-down"&gt;Item&lt;/span&gt;
+&lt;span class="accordion-item accordion-item--icon-right"&gt;Item&lt;/span&gt;
+&lt;span class="accordion-item accordion-item--icon-plus"&gt;Item&lt;/span&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <!-- Data Attributes方法 -->
+                <div class="comparison-card">
+                    <h3 class="comparison-card__title comparison-card__title--data">Data Attributes方法</h3>
+                    <div class="comparison-card__code">
+                        <div class="accordion-example">
+                            <span class="accordion-item" data-icon="down-arrow">向下箭头</span>
+                            <span class="accordion-item" data-icon="right-arrow">向右箭头</span>
+                            <span class="accordion-item" data-icon="plus">加号图标</span>
+                        </div>
+                        <pre><code>&lt;span data-icon="down-arrow"&gt;Item&lt;/span&gt;
+&lt;span data-icon="right-arrow"&gt;Item&lt;/span&gt;
+&lt;span data-icon="plus"&gt;Item&lt;/span&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- CSS对比 -->
+            <div class="css-comparison">
+                <h4 class="css-comparison__title">CSS选择器对比</h4>
+                <div class="css-examples">
+                    <div class="css-example">
+                        <h5>BEM CSS:</h5>
+                        <pre><code>.accordion-item { /* 通用样式 */ }
+.accordion-item--icon-down { /* 向下箭头样式 */ }
+.accordion-item--icon-right { /* 向右箭头样式 */ }
+.accordion-item--icon-plus { /* 加号样式 */ }</code></pre>
+                    </div>
+                    <div class="css-example">
+                        <h5>Data Attributes CSS:</h5>
+                        <pre><code>[data-icon] { /* 通用样式 */ }
+[data-icon="down-arrow"] { /* 向下箭头样式 */ }
+[data-icon="right-arrow"] { /* 向右箭头样式 */ }
+[data-icon="plus"] { /* 加号样式 */ }</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 交互演示1 -->
+        <section class="interactive-demo">
+            <h2 class="interactive-demo__title">交互式演示 - Accordion图标</h2>
+            <div class="demo-controls">
+                <button class="demo-toggle active" data-target="accordion-bem">BEM方式</button>
+                <button class="demo-toggle" data-target="accordion-data">Data Attributes方式</button>
+            </div>
+            
+            <!-- BEM演示 -->
+            <div id="accordion-bem" class="demo-content active">
+                <div class="accordion-container">
+                    <div class="accordion-item accordion-item--icon-down">项目 1 - 向下箭头</div>
+                    <div class="accordion-item accordion-item--icon-right">项目 2 - 向右箭头</div>
+                    <div class="accordion-item accordion-item--icon-plus">项目 3 - 加号图标</div>
+                </div>
+                <p class="demo-description">点击上方按钮切换查看Data Attributes方式</p>
+            </div>
+            
+            <!-- Data Attributes演示 -->
+            <div id="accordion-data" class="demo-content">
+                <div class="accordion-container">
+                    <div class="accordion-item" data-icon="down-arrow">项目 1 - 向下箭头</div>
+                    <div class="accordion-item" data-icon="right-arrow">项目 2 - 向右箭头</div>
+                    <div class="accordion-item" data-icon="plus">项目 3 - 加号图标</div>
+                </div>
+                <p class="demo-description">点击上方按钮切换查看BEM方式</p>
+            </div>
+        </section>
+
+        <!-- 场景2: Badge徽章组件 -->
+        <section class="scenario">
+            <h2 class="scenario__title">场景2: Badge徽章组件</h2>
+            <p class="scenario__description">
+                想象一个列表控制或菜单组件，编辑者可以在项目前后添加文本。这可能是产品名称后的彩色圆圈"NEW"，或者是带数字的红色通知徽章。
+            </p>
+            
+            <div class="badge-selector">
+                <h4 class="badge-selector__title">CMS配置选项</h4>
+                <div class="badge-controls">
+                    <label>
+                        类型:
+                        <select id="badge-type">
+                            <option value="badge">徽章</option>
+                            <option value="circle">圆圈</option>
+                            <option value="dot">点</option>
+                            <option value="pill">药丸</option>
+                        </select>
+                    </label>
+                    <label>
+                        颜色:
+                        <select id="badge-color">
+                            <option value="red">红色</option>
+                            <option value="blue">蓝色</option>
+                            <option value="green">绿色</option>
+                            <option value="orange">橙色</option>
+                        </select>
+                    </label>
+                    <label>
+                        水平位置:
+                        <select id="badge-posh">
+                            <option value="left">左侧</option>
+                            <option value="right">右侧</option>
+                        </select>
+                    </label>
+                    <label>
+                        垂直位置:
+                        <select id="badge-posv">
+                            <option value="top">上方</option>
+                            <option value="bottom">下方</option>
+                        </select>
+                    </label>
+                    <label>
+                        文本:
+                        <input type="text" id="badge-text" value="NEW">
+                    </label>
+                </div>
+            </div>
+
+            <div class="comparison-grid">
+                <!-- BEM方法 -->
+                <div class="comparison-card">
+                    <h3 class="comparison-card__title comparison-card__title--bem">传统BEM方法</h3>
+                    <div class="comparison-card__example">
+                        <button class="c-txt c-txt--badge c-txt--color-red c-txt--posv-top c-txt--posh-left">
+                            示例产品
+                        </button>
+                    </div>
+                    <div class="comparison-card__code">
+                        <pre><code>&lt;button class="c-txt c-txt--badge c-txt--color-red 
+       c-txt--posv-top c-txt--posh-left"&gt;
+    产品名称
+&lt;/button&gt;</code></pre>
+                    </div>
+                </div>
+                
+                <!-- Data Attributes方法 -->
+                <div class="comparison-card">
+                    <h3 class="comparison-card__title comparison-card__title--data">Data Attributes方法</h3>
+                    <div class="comparison-card__example">
+                        <button class="product-item" data-text-type="red badge top left" data-text="NEW">
+                            示例产品
+                        </button>
+                    </div>
+                    <div class="comparison-card__code">
+                        <pre><code>&lt;button class="product-item" data-text-type="red badge top left" 
+       data-text="NEW"&gt;
+    产品名称
+&lt;/button&gt;</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 交互演示2 - Badge -->
+        <section class="interactive-demo">
+            <h2 class="interactive-demo__title">交互式演示 - Badge徽章</h2>
+            
+            <div class="demo-content active">
+                <div class="badge-demo">
+                    <button class="product-item" data-text="NEW">
+                        示例产品 1
+                    </button>
+                    <button class="product-item" data-text="HOT" data-text-type="orange badge top right">
+                        热门产品
+                    </button>
+                    <button class="product-item" data-text="SALE" data-text-type="red circle top left">
+                        特价商品
+                    </button>
+                </div>
+                <p class="demo-description">尝试修改上方的CMS配置来查看效果</p>
+            </div>
+        </section>
+
+        <!-- 技术优势对比 -->
+        <section class="advantages">
+            <h2 class="advantages__title">为什么选择Data Attributes？</h2>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title">后端友好</h3>
+                    <p class="advantage-card__text">后端开发者更容易理解和实现，不需要复杂的CSS类名生成逻辑</p>
+                </div>
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title">代码清晰</h3>
+                    <p class="advantage-card__text">HTML更简洁，不会有冗长的class列表</p>
+                </div>
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title">灵活性高</h3>
+                    <p class="advantage-card__text">支持多个值，可以轻松添加新的修饰符</p>
+                </div>
+                <div class="advantage-card">
+                    <h3 class="advantage-card__title">CMS集成</h3>
+                    <p class="advantage-card__text">在CMS系统中更自然地与后端数据模型映射</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 总结 -->
+        <section class="summary">
+            <h2 class="summary__title">总结</h2>
+            <div class="summary__content">
+                <p>在CMS组件定制场景下，Data Attributes提供了一个更实用、更易维护的解决方案：</p>
+                <ul class="summary__list">
+                    <li><strong>简化后端实现</strong>：后端开发者只需输出简单的键值对</li>
+                    <li><strong>提高代码可读性</strong>：HTML更简洁，意图更明确</li>
+                    <li><strong>支持复杂组合</strong>：一个属性可以包含多个值</li>
+                    <li><strong>渐进式CSS</strong>：支持通用样式和特定样式的组合</li>
+                </ul>
+                <p>虽然在某些纯CSS场景下BEM仍然有价值，但在CMS集成场景中，Data Attributes往往是更好的选择。</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
